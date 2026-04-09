@@ -2,7 +2,10 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/aruco.hpp>
 
+using namespace std;
+using namespace cv;
+
 int main() {
-    std::cout << "OpenCV version: " << CV_VERSION << std::endl;
+    cout << "OpenCV versionaaaa: " << CV_VERSION << endl;
     return 0;
 }

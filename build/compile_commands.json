@@ -1,0 +1,8 @@
+[
+{
+  "directory": "C:/Users/luizm/OneDrive/Área de Trabalho/open cv aruco/open-cv-aruco-ar/build",
+  "command": "C:\\PROGRA~2\\MICROS~2\\18\\BUILDT~1\\VC\\Tools\\MSVC\\1450~1.357\\bin\\Hostx64\\x64\\cl.exe  /nologo /TP -external:IC:\\vcpkg\\installed\\x64-windows\\include\\opencv4 -external:W0 /DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -MDd /FoCMakeFiles\\aruco_ar.dir\\main.cpp.obj /FdCMakeFiles\\aruco_ar.dir\\ /FS -c \"C:\\Users\\luizm\\OneDrive\\Área de Trabalho\\open cv aruco\\open-cv-aruco-ar\\main.cpp\"",
+  "file": "C:/Users/luizm/OneDrive/Área de Trabalho/open cv aruco/open-cv-aruco-ar/main.cpp",
+  "output": "C:/Users/luizm/OneDrive/Área de Trabalho/open cv aruco/open-cv-aruco-ar/build/CMakeFiles/aruco_ar.dir/main.cpp.obj"
+}
+]
