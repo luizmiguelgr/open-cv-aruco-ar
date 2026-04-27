@@ -10,3 +10,7 @@ find_package(OpenCV REQUIRED)
 add_executable(aruco_ar main.cpp)
 
 target_link_libraries(aruco_ar ${OpenCV_LIBS})
+
+# gerador de marcadores
+add_executable(generate_markers generate_markers.cpp)
+target_link_libraries(generate_markers ${OpenCV_LIBS})

@@ -1,3 +1,0 @@
-C:/Users/luizm/OneDrive/Área de Trabalho/open cv aruco/open-cv-aruco-ar/build/CMakeFiles/aruco_ar.dir
-C:/Users/luizm/OneDrive/Área de Trabalho/open cv aruco/open-cv-aruco-ar/build/CMakeFiles/edit_cache.dir
-C:/Users/luizm/OneDrive/Área de Trabalho/open cv aruco/open-cv-aruco-ar/build/CMakeFiles/rebuild_cache.dir
