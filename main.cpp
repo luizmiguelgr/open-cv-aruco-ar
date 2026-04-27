@@ -6,14 +6,14 @@ using namespace std;
 using namespace cv;
 
 int main() {
-    VideoCapture cap(0) // abre primeira câmera do dispositivo
+    VideoCapture cap(0); // abre primeira câmera do dispositivo
     if (!cap.isOpened()) {
         cout << "Erro ao abrir câmera!!!!!!" << endl;
         return -1; // se não abrir câmera, snaliza erro
     }
 
     //conjunto de marcadores
-    aruco::Dictionary dictionary = aruco::getPredefinedDictionary(aruco::DICT_4x4_50);
+    aruco::Dictionary dictionary = aruco::getPredefinedDictionary(aruco::DICT_4X4_50);
     //detecção de parâmetros base (sensibilidade, distorções, etc.)
     aruco::DetectorParameters detectorParams;
     //procurador dos marcadores nos frames

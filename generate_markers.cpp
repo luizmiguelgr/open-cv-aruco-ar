@@ -10,7 +10,7 @@ int main() {
 
     int markerSize = 200; //tamanho da imagem
 
-    int totalMarkers = 4;
+    int totalMarkers = 4; // quantos marcadores
 
     for (int id = 0; id < totalMarkers; id++) {
         Mat markerImage;
