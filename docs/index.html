@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AR Educacional — OpenCV + ArUco</title>
+<style>
+  :root {
+    --bio: #3CB44B;
+    --hist: #E68C00;
+    --geo: #1E82DC;
+    --bg: #0e0e12;
+    --card: #1a1a22;
+    --text: #e6e6ea;
+    --muted: #8d8d99;
+    --accent: #7aa2ff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  header {
+    padding: 80px 20px 50px;
+    text-align: center;
+    background: linear-gradient(135deg, #1a1a22 0%, #0e0e12 100%);
+    border-bottom: 1px solid #2a2a35;
+  }
+  header h1 {
+    font-size: 2.6em;
+    margin: 0 0 12px;
+    font-weight: 700;
+  }
+  header .tagline {
+    color: var(--muted);
+    font-size: 1.15em;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .badges {
+    margin-top: 24px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    background: var(--card);
+    color: var(--muted);
+    border: 1px solid #2a2a35;
+  }
+  .links {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .links a {
+    padding: 10px 22px;
+    border-radius: 6px;
+    background: var(--accent);
+    color: #0e0e12;
+    text-decoration: none;
+    font-weight: 600;
+    transition: transform 0.15s;
+  }
+  .links a:hover { transform: translateY(-2px); }
+  .links a.secondary {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+  }
+  main { max-width: 960px; margin: 0 auto; padding: 60px 24px; }
+  section { margin-bottom: 60px; }
+  h2 {
+    font-size: 1.7em;
+    border-left: 4px solid var(--accent);
+    padding-left: 14px;
+    margin-bottom: 24px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid #2a2a35;
+    border-radius: 10px;
+    padding: 22px;
+  }
+  .card.bio  { border-left: 4px solid var(--bio); }
+  .card.hist { border-left: 4px solid var(--hist); }
+  .card.geo  { border-left: 4px solid var(--geo); }
+  .card h3 { margin: 0 0 8px; font-size: 1.15em; }
+  .card .sub { color: var(--muted); font-size: 0.9em; }
+  pre {
+    background: #07070b;
+    padding: 18px;
+    border-radius: 8px;
+    overflow-x: auto;
+    border: 1px solid #2a2a35;
+    color: #c9d1d9;
+    font-size: 0.9em;
+  }
+  code {
+    background: #07070b;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 0.9em;
+  }
+  pre code { background: none; padding: 0; }
+  ul { padding-left: 22px; }
+  li { margin-bottom: 8px; }
+  footer {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    border-top: 1px solid #2a2a35;
+    font-size: 0.9em;
+  }
+  .ascii {
+    font-family: Consolas, monospace;
+    font-size: 0.78em;
+    line-height: 1.35;
+    white-space: pre;
+    color: #c9d1d9;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>AR Educacional</h1>
+  <p class="tagline">
+    Aplicação de Realidade Aumentada em C++ que usa marcadores ArUco para exibir
+    modelos 3D associados a matérias escolares (Biologia, História, Geografia).
+  </p>
+  <div class="badges">
+    <span class="badge">C++17</span>
+    <span class="badge">OpenCV 4.x</span>
+    <span class="badge">ArUco</span>
+    <span class="badge">POO</span>
+    <span class="badge">2º Período</span>
+  </div>
+  <div class="links">
+    <a href="https://github.com/SEU_USUARIO/open-cv-aruco-ar">Código no GitHub</a>
+    <a href="RELATORIO.pdf" class="secondary">Relatório (PDF)</a>
+    <a href="https://youtu.be/SEU_VIDEO" class="secondary">Vídeo</a>
+  </div>
+</header>
+
+<main>
+
+<section>
+  <h2>O que faz</h2>
+  <p>
+    O sistema captura vídeo da webcam em tempo real, detecta marcadores fiduciais
+    ArUco impressos em papel e, sobre cada um, renderiza um modelo 3D em wireframe
+    junto com uma legenda da matéria correspondente. É uma ferramenta didática:
+    cada marcador vira uma "carta" de uma disciplina.
+  </p>
+
+  <div class="grid">
+    <div class="card bio">
+      <h3>Biologia</h3>
+      <p class="sub">Marcadores 0 e 1</p>
+      <p>Crânio humano (modelo OBJ) e formas geométricas. Cor tema: verde.</p>
+    </div>
+    <div class="card hist">
+      <h3>História</h3>
+      <p class="sub">Marcador 2</p>
+      <p>Modelo de fuzil M4A1 representando tecnologia militar moderna. Cor tema: laranja.</p>
+    </div>
+    <div class="card geo">
+      <h3>Geografia</h3>
+      <p class="sub">Marcadores 3 e 4</p>
+      <p>Rocha low-poly representando ciclo geológico. Cor tema: azul.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Principais recursos</h2>
+  <ul>
+    <li>Detecção em tempo real de múltiplos marcadores ArUco com estimação de pose 3D.</li>
+    <li>Renderização wireframe de modelos <code>.obj</code> arbitrários (parser próprio).</li>
+    <li>HUD com barra colorida da matéria, título e descrição.</li>
+    <li>Configuração externa em <code>conteudos.txt</code> — adicionar modelos sem recompilar.</li>
+    <li>Arquitetura orientada a objetos com herança, polimorfismo e composição.</li>
+    <li>Extensível: novas matérias entram com uma única subclasse.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Arquitetura</h2>
+  <p>O código é dividido em três camadas:</p>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Geometria</h3>
+      <p class="sub"><code>Objeto3D</code> (abstrata)</p>
+      <p><code>Cubo</code>, <code>Piramide</code>, <code>ModeloOBJ</code>. Cada classe sabe se projetar com <code>cv::projectPoints</code> e desenhar suas arestas.</p>
+    </div>
+    <div class="card">
+      <h3>Educação</h3>
+      <p class="sub"><code>ConteudoEducacional</code> (abstrata)</p>
+      <p><code>ConteudoBiologia</code>, <code>ConteudoHistoria</code>, <code>ConteudoGeografia</code>. Cada conteúdo <em>compõe</em> um <code>Objeto3D*</code> e associa uma <code>Materia</code>.</p>
+    </div>
+    <div class="card">
+      <h3>Orquestração</h3>
+      <p class="sub"><code>GerenciadorConteudo</code> + <code>ConfigLoader</code></p>
+      <p>Mapeia ID do marcador ArUco para o conteúdo correspondente. Lê o <code>conteudos.txt</code> no início.</p>
+    </div>
+  </div>
+
+  <p style="margin-top: 30px;">Diagrama simplificado:</p>
+<pre class="ascii">
+   Objeto3D (abstrata)             ConteudoEducacional (abstrata)
+       ▲                                      ▲
+       │                                      │
+   Cubo, Piramide,                  Biologia, Historia,
+   ModeloOBJ                        Geografia
+       ▲                                      │
+       │                                      │ contém um (composição)
+       └──────────────────────────────────────┘
+
+   GerenciadorConteudo  ──── map&lt;int, ConteudoEducacional*&gt;
+            ▲
+            │ popula
+   ConfigLoader ◀── conteudos.txt
+</pre>
+</section>
+
+<section>
+  <h2>Conceitos de POO aplicados</h2>
+  <ul>
+    <li><strong>Herança:</strong> duas hierarquias paralelas (<code>Objeto3D</code> e <code>ConteudoEducacional</code>).</li>
+    <li><strong>Polimorfismo:</strong> chamadas como <code>conteudo-&gt;renderizar()</code> e <code>modelo-&gt;desenhar()</code> resolvidas em tempo de execução via vtable.</li>
+    <li><strong>Composição:</strong> <code>ConteudoEducacional</code> contém um <code>Objeto3D*</code> em vez de herdar dele — qualquer matéria com qualquer geometria.</li>
+    <li><strong>Abstração:</strong> métodos virtuais puros forçam subclasses a implementarem desenho e curiosidade.</li>
+    <li><strong>Encapsulamento:</strong> campos <code>private</code>/<code>protected</code> com getters públicos.</li>
+    <li><strong>Padrões de projeto:</strong> Strategy (geometrias), Factory (criação a partir de string), Template Method (esqueleto de <code>renderizar</code>).</li>
+    <li><strong>Ponteiros e referências:</strong> ponteiros para classe base habilitam polimorfismo; destrutores virtuais garantem liberação correta de memória.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Compilar e rodar</h2>
+<pre><code>cmake -B build -S .
+cmake --build build --config Release
+.\build\Release\aruco_ar.exe</code></pre>
+  <p>
+    Requer OpenCV instalado via vcpkg (<code>vcpkg install opencv4</code>). Imprima os marcadores
+    ArUco 0–4 (gere com <code>generate_markers.exe</code>) e aponte a webcam para eles.
+  </p>
+</section>
+
+<section>
+  <h2>Como expandir</h2>
+  <p>Para adicionar um novo modelo, basta editar <code>conteudos.txt</code>:</p>
+<pre><code>Geografia | 5 | obj | vulcao/vulcao.obj | 0.02 | 0,0,0 | 0,0,0 | 200,80,40 | Vulcão | Tipo de relevo</code></pre>
+  <p>Para adicionar uma nova matéria (ex.: Arte), basta criar uma subclasse de <code>ConteudoEducacional</code> em 2 arquivos.</p>
+</section>
+
+<section>
+  <h2>Equipe</h2>
+  <ul>
+    <li>[Nome 1] — [contribuição]</li>
+    <li>[Nome 2] — [contribuição]</li>
+    <li>[Nome 3] — [contribuição]</li>
+    <li>[Nome 4] — [contribuição]</li>
+  </ul>
+</section>
+
+</main>
+
+<footer>
+  Projeto de Programação Orientada a Objetos — 2º período · 2026
+</footer>
+
+</body>
+</html>

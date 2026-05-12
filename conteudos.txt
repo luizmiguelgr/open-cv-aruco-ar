@@ -1,0 +1,30 @@
+# ===========================================================================
+# Arquivo de config dos conteudos educacionais.
+# Cada linha = 1 conteudo associado a 1 marcador ArUco.
+#
+# Formato (separador = '|'):
+# materia | id | tipo | arquivo | escala | rotX,rotY,rotZ | offX,offY,offZ | R,G,B | titulo | descricao
+#
+# materia : Biologia | Historia | Geografia
+# tipo    : cubo | piramide | obj
+# arquivo : caminho do .obj  (use '-' se for cubo ou piramide)
+# escala  : float em metros (ex.: 0.025 = 2.5 cm)
+# rot     : 3 angulos em graus (ex.: 90,0,0)
+# off     : 3 offsets em metros (ex.: 0,0,0)
+# cor     : R,G,B 0-255 (do wireframe)
+# ===========================================================================
+
+# --- Biologia: cubo verde como exemplo simples ---
+Biologia  | 0 | cubo     | -                                                              | 0.025 | 0,0,0    | 0,0,0      | 60,180,75   | Cubo (placeholder) | Exemplo de objeto 3D simples
+
+# --- Biologia: Cranio humano ---
+Biologia  | 1 | obj      | Skull/Skull_v3_L2.123c1407fc1e-ea5c-4cb9-9072-d28b8aba4c36/12140_Skull_v3_L2.obj | 0.001 | -90,0,0  | 0,0,-0.02  | 220,220,220 | Cranio humano      | 22 ossos fundidos protegem o cerebro
+
+# --- Historia: Fuzil M4A1 ---
+Historia  | 2 | obj      | M4A1/M4A1.obj                                                  | 0.005 | 0,0,0    | 0,0,0      | 255,180,80  | Fuzil M4A1         | Arma de uso militar, smb dos EUA pos-1994
+
+# --- Geografia: Rocha ---
+Geografia | 3 | obj      | rock/Rock1/Rock1.obj                                           | 0.02  | 0,0,0    | 0,0,0      | 180,140,90  | Rocha               | Formacao mineral parte do ciclo geologico
+
+# --- Geografia: piramide laranja como exemplo ---
+Geografia | 4 | piramide | -                                                              | 0.025 | 0,0,0    | 0,0,0      | 220,130,30  | Piramide (placeholder) | Exemplo geometrico
