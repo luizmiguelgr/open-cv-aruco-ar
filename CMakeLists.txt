@@ -6,11 +6,16 @@ set(CMAKE_PREFIX_PATH "C:/vcpkg/installed/x64-windows")
 project(aruco_ar)
 
 find_package(OpenCV REQUIRED)
+find_package(assimp REQUIRED)
 
-add_executable(aruco_ar main.cpp)
+add_executable(aruco_ar 
+    main.cpp
+    ObjetoAR.h
+    ObjetoAnatomia.h
+    ObjetoHistoria.h
+    GerenciadorAR.h
+)
+target_link_libraries(aruco_ar ${OpenCV_LIBS} assimp::assimp)
 
-target_link_libraries(aruco_ar ${OpenCV_LIBS})
-
-# gerador de marcadores
 add_executable(generate_markers generate_markers.cpp)
 target_link_libraries(generate_markers ${OpenCV_LIBS})
