@@ -3,6 +3,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <cfloat>
 
 // Classe intermediária para objetos de história
 // Herda de ObjetoAR e serve de base para todos os modelos históricos
@@ -80,8 +81,11 @@ public:
         // tamanho máximo do modelo
         float tamanho = max({maxX - minX, maxY - minY, maxZ - minZ});
 
+        // imprime o tamanho para debug
+        cout << "Tamanho do modelo: " << tamanho << endl;
+
         // escala para caber em 0.05 metros (5cm)
-        float escala = 0.0000000000000000000001f;
+        float escala = 0.05f / tamanho;
 
         for (unsigned int m = 0; m < cena->mNumMeshes; m++) {
             aiMesh* malha = cena->mMeshes[m];

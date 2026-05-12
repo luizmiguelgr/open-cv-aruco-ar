@@ -21,7 +21,7 @@ int main() {
     Mat distCoeffs = Mat::zeros(5, 1, CV_64F);
 
     // Tamanho físico do marcador em metros
-    float markerLength = 0.05f; // 5 centímetros
+    float markerLength = 0.08f; // 5 centímetros
 
     // Conjunto de marcadores ArUco 4x4
     aruco::Dictionary dictionary = aruco::getPredefinedDictionary(aruco::DICT_4X4_50);
