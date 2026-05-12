@@ -18,6 +18,8 @@ public:
     GerenciadorAR() {
         // ID 0 -> Torre Eiffel (historia)
         objetos[0] = new TorreEiffelAR();
+        objetos[1] = new EstatuaAR();
+        objetos[2] = new CranioAR();
     }
 
     // Destrutor: libera a memória de todos os objetos
