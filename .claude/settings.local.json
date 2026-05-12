@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cmake -S . -B build)",
+      "PowerShell($cmake = \\(Get-Command cmake -ErrorAction SilentlyContinue\\).Source; if \\($null -eq $cmake\\) { \"cmake nao encontrado no PATH\" } else { \"cmake: $cmake\"; cmake --version | Select-Object -First 1 })",
+      "PowerShell($paths = @\\(\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\Common7\\\\IDE\\\\CommonExtensions\\\\Microsoft\\\\CMake\\\\CMake\\\\bin\\\\cmake.exe\", \"C:\\\\Program Files \\(x86\\)\\\\Microsoft Visual Studio\\\\2022\\\\BuildTools\\\\Common7\\\\IDE\\\\CommonExtensions\\\\Microsoft\\\\CMake\\\\CMake\\\\bin\\\\cmake.exe\", \"C:\\\\Program Files\\\\CMake\\\\bin\\\\cmake.exe\"\\); foreach \\($p in $paths\\) { if \\(Test-Path $p\\) { \"FOUND: $p\" } })",
+      "PowerShell($vswhere = \"C:\\\\Program Files \\(x86\\)\\\\Microsoft Visual Studio\\\\Installer\\\\vswhere.exe\"; if \\(Test-Path $vswhere\\) { & $vswhere -latest -property installationPath } else { \"vswhere nao existe\" })",
+      "PowerShell($cl = \\(Get-Command cl -ErrorAction SilentlyContinue\\).Source; if \\($null -eq $cl\\) { \"cl nao encontrado\" } else { \"cl: $cl\" }; $vcpkg = \"C:\\\\vcpkg\\\\vcpkg.exe\"; if \\(Test-Path $vcpkg\\) { \"vcpkg existe em $vcpkg\" } else { \"vcpkg NAO existe em C:\\\\vcpkg\" })"
+    ]
+  }
+}
