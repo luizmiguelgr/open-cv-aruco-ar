@@ -5,27 +5,24 @@
 #include <assimp/postprocess.h>
 #include <cfloat>
 
-// Classe intermediária para objetos de história
-// Herda de ObjetoAR e serve de base para todos os modelos históricos
+// base para objetos históricos, cuida do carregamento do modelo 3D
 class ObjetoHistoria : public ObjetoAR {
 
 protected:
-    string caminhoModelo; // caminho para o arquivo .obj do modelo 3D
-    Assimp::Importer importador; // importador do Assimp
-    const aiScene* cena; // cena com os dados do modelo 3D
+    string caminhoModelo;
+    Assimp::Importer importador;
+    const aiScene* cena;
 
 public:
     ObjetoHistoria(int id, string nome, string caminhoModelo)
         : ObjetoAR(id, nome), caminhoModelo(caminhoModelo) {
 
         cena = importador.ReadFile(caminhoModelo,
-            aiProcess_Triangulate |  // converte faces para triângulos
-            aiProcess_FlipUVs);      // corrige coordenadas de textura
+            aiProcess_Triangulate |  // converte polígonos em triângulos
+            aiProcess_FlipUVs);      // corrige orientação das texturas
 
         if (!cena) {
             cout << "Erro ao carregar modelo: " << caminhoModelo << endl;
-        } else {
-            cout << "Modelo carregado: " << nome << endl;
         }
     }
 
@@ -38,8 +35,7 @@ public:
                         const Vec3d& tvec) = 0;
 };
 
-// Classe concreta da Torre Eiffel
-// Herda de ObjetoHistoria, vinculada ao marcador ID 0
+// marcador ID 0
 class TorreEiffelAR : public ObjetoHistoria {
 
 public:
@@ -56,7 +52,7 @@ public:
 
         if (!cena) return;
 
-        // coleta todos os vértices para calcular o centro e tamanho do modelo
+        // calcula bounding box pra centralizar e normalizar o modelo
         float minX = FLT_MAX, maxX = -FLT_MAX;
         float minY = FLT_MAX, maxY = -FLT_MAX;
         float minZ = FLT_MAX, maxZ = -FLT_MAX;
@@ -73,24 +69,16 @@ public:
             }
         }
 
-        // centro do modelo
         float cx = (minX + maxX) / 2.0f;
         float cy = (minY + maxY) / 2.0f;
         float cz = (minZ + maxZ) / 2.0f;
 
-        // tamanho máximo do modelo
         float tamanho = max({maxX - minX, maxY - minY, maxZ - minZ});
-
-        // imprime o tamanho para debug
-        cout << "Tamanho do modelo: " << tamanho << endl;
-
-        // escala para caber em 0.05 metros (5cm)
         float escala = 0.15f / tamanho;
 
         for (unsigned int m = 0; m < cena->mNumMeshes; m++) {
             aiMesh* malha = cena->mMeshes[m];
 
-            // centraliza e escala os vértices do modelo
             vector<Point3f> pontos3D;
             for (unsigned int v = 0; v < malha->mNumVertices; v++) {
                 pontos3D.push_back(Point3f(
@@ -100,12 +88,11 @@ public:
                 ));
             }
 
-            // projeta os vértices 3D no plano 2D da câmera
+            // projeta os pontos 3D no plano da câmera
             vector<Point2f> pontos2D;
             projectPoints(pontos3D, rvec, tvec,
                           cameraMatrix, distCoeffs, pontos2D);
 
-            // desenha as arestas de cada triângulo do modelo
             for (unsigned int f = 0; f < malha->mNumFaces; f++) {
                 aiFace face = malha->mFaces[f];
                 if (face.mNumIndices != 3) continue;
@@ -118,8 +105,7 @@ public:
     }
 };
 
-// Classe concreta da Estátua
-// Herda de ObjetoHistoria, vinculada ao marcador ID 1
+// marcador ID 1
 class EstatuaAR : public ObjetoHistoria {
 
 public:

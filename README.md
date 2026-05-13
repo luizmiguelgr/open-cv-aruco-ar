@@ -1,56 +1,106 @@
-# open-cv-aruco-ar
-Projeto de Realidade Aumentada com ArUco Markers — CIn/UFPE
-Disciplina: Estruturas de Dados Orientadas a Objetos (CIN0135)
-Integrantes: Kaíque Bonfim, Luiz Miguel e Luiz Taiguara
+# ArUco AR — Realidade Aumentada com OpenCV
 
-## O que o projeto faz
-Detecta marcadores ArUco pela câmera e renderiza modelos 3D em cima deles em tempo real.
+Projeto da disciplina CIN0135 (Estruturas de Dados Orientadas a Objetos) — CIn/UFPE.
 
-- ID 0 -> Torre Eiffel (História)
-- ID 1 -> Estátua (História)
-- ID 2 -> Crânio (Anatomia)
+A aplicação detecta marcadores ArUco pela webcam e sobrepõe modelos 3D em wireframe sobre eles em tempo real.
 
-## Requisitos
-- Windows 10/11 64-bit
-- Visual Studio Build Tools: https://visualstudio.microsoft.com/visual-cpp-build-tools/
-  (marcar "Desenvolvimento para desktop com C++")
-- Git: https://git-scm.com/download/win
-- VS Code: https://code.visualstudio.com/
-  Extensões: ms-vscode.cpptools, ms-vscode.cmake-tools, twxs.cmake
+---
 
-## Instalação
+## Configuração do ambiente
 
-1. Instalar o vcpkg
+Veja o [SETUP.md](SETUP.md) para instalar as dependências (vcpkg, OpenCV, Assimp) e configurar o VS Code.
 
-cd C:\
-git clone https://github.com/microsoft/vcpkg
-cd vcpkg
-.\bootstrap-vcpkg.bat
-.\vcpkg integrate install
+---
 
-2. Instalar as bibliotecas
+## Como compilar e rodar
 
-.\vcpkg install opencv4[contrib]:x64-windows
-.\vcpkg install assimp:x64-windows
+Com o ambiente configurado, abra o projeto no VS Code e use o CMake Tools para compilar. Alternativamente, pela linha de comando:
 
-3. Clonar o repositório
+```powershell
+mkdir build
+cd build
+cmake .. -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
+cmake --build . --config Release
+```
 
-git clone https://github.com/luizmiguelgr/open-cv-aruco-ar.git
-cd open-cv-aruco-ar
+Isso gera dois executáveis dentro de `build/Release/`:
 
-4. Compilar
+| Executável | O que faz |
+|---|---|
+| `aruco_ar` | Aplicação principal (webcam + AR) |
+| `generate_markers` | Gera os marcadores ArUco em PNG |
 
-"C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" -DCMAKE_PREFIX_PATH="C:/vcpkg/installed/x64-windows" -A x64 -S . -B build
+### Gerando os marcadores
 
-"C:\Program Files (x86)\Microsoft Visual Studio\18\BuildTools\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" --build build
+Antes de rodar pela primeira vez, gere os marcadores que serão impressos ou exibidos na tela:
 
-5. Rodar
+```powershell
+.\build\Release\generate_markers.exe
+```
 
-.\build\Debug\aruco_ar.exe
+Os arquivos `marker_0.png`, `marker_1.png` e `marker_2.png` serão criados na pasta `markers/`.
 
-## Como usar
-1. Imprima ou abra na tela os marcadores da pasta markers/
-2. Rode o programa
-3. Aponte a câmera para o marcador
-4. O modelo 3D aparece em cima do marcador automaticamente
-5. Pressione ESC para fechar
+### Rodando a aplicação
+
+```powershell
+.\build\Release\aruco_ar.exe
+```
+
+A janela da webcam abre automaticamente. Aponte a câmera para um dos marcadores impressos e o modelo 3D correspondente aparece sobre ele. Pressione **ESC** para sair.
+
+| Marcador | Modelo |
+|---|---|
+| `marker_0.png` | Torre Eiffel |
+| `marker_1.png` | Estátua |
+| `marker_2.png` | Crânio |
+
+---
+
+## Arquitetura
+
+O projeto usa herança e polimorfismo para separar o que é comum (carregar e renderizar um modelo 3D) do que é específico de cada objeto.
+
+```
+ObjetoAR  (classe base abstrata)
+│   render() → método virtual puro
+│
+├── ObjetoHistoria  (abstrata — carrega modelo via Assimp)
+│   ├── TorreEiffelAR   (ID 0)
+│   └── EstatuaAR       (ID 1)
+│
+└── ObjetoAnatomia  (abstrata — mesma estrutura de ObjetoHistoria)
+    └── CranioAR        (ID 2)
+
+GerenciadorAR  (mapeia ID do marcador → ObjetoAR*)
+```
+
+**ObjetoAR** define a interface: todo objeto AR tem um ID, um nome e um método `render()`. Como `render()` é virtual puro, cada subclasse concreta é obrigada a implementar a sua versão.
+
+**ObjetoHistoria** e **ObjetoAnatomia** são classes intermediárias que cuidam do carregamento do arquivo `.obj` com o Assimp. As subclasses concretas herdam a cena carregada e só precisam implementar o `render()`.
+
+**GerenciadorAR** mantém um `map<int, ObjetoAR*>` que associa cada ID de marcador ao objeto correspondente. O ponteiro para a classe base é o que permite chamar o `render()` correto de cada objeto sem o `main` precisar saber qual subclasse está sendo usada.
+
+---
+
+## Como funciona
+
+O loop principal em `main.cpp` faz quatro coisas a cada frame:
+
+1. **Detecta os marcadores** — `ArucoDetector` encontra os marcadores ArUco no frame e retorna os cantos de cada um e seus IDs.
+
+2. **Estima a pose** — `solvePnP` recebe os cantos do marcador na imagem e os pontos equivalentes no espaço 3D real (baseado no tamanho físico do marcador em metros) e calcula os vetores de rotação (`rvec`) e translação (`tvec`) que descrevem onde o marcador está no espaço.
+
+3. **Busca o objeto** — `GerenciadorAR::getObjeto(id)` retorna o ponteiro para o objeto 3D vinculado àquele ID.
+
+4. **Renderiza** — chama `objeto->render(frame, rvec, tvec, ...)`, que projeta os vértices do modelo 3D no plano 2D da câmera com `projectPoints` e desenha as arestas de cada triângulo da malha.
+
+O resultado é o wireframe do modelo "colado" sobre o marcador, acompanhando sua posição e rotação em tempo real.
+
+---
+
+## Dependências
+
+- [OpenCV 4](https://opencv.org/) — detecção de marcadores ArUco e operações de visão computacional
+- [Assimp](https://assimp.org/) — carregamento de modelos 3D (.obj)
+- [vcpkg](https://vcpkg.io/) — gerenciador de pacotes C++
+- CMake 3.15+

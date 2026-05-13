@@ -5,27 +5,24 @@
 #include <assimp/postprocess.h>
 #include <cfloat>
 
-// Classe intermediária para objetos de anatomia
-// Herda de ObjetoAR e serve de base para todos os modelos anatômicos
+// base para objetos anatômicos, mesma estrutura de ObjetoHistoria
 class ObjetoAnatomia : public ObjetoAR {
 
 protected:
-    string caminhoModelo; // caminho para o arquivo .obj do modelo 3D
-    Assimp::Importer importador; // importador do Assimp
-    const aiScene* cena; // cena com os dados do modelo 3D
+    string caminhoModelo;
+    Assimp::Importer importador;
+    const aiScene* cena;
 
 public:
     ObjetoAnatomia(int id, string nome, string caminhoModelo)
         : ObjetoAR(id, nome), caminhoModelo(caminhoModelo) {
 
         cena = importador.ReadFile(caminhoModelo,
-            aiProcess_Triangulate |  // converte faces para triângulos
-            aiProcess_FlipUVs);      // corrige coordenadas de textura
+            aiProcess_Triangulate |  // converte polígonos em triângulos
+            aiProcess_FlipUVs);      // corrige orientação das texturas
 
         if (!cena) {
             cout << "Erro ao carregar modelo: " << caminhoModelo << endl;
-        } else {
-            cout << "Modelo carregado: " << nome << endl;
         }
     }
 
@@ -38,8 +35,7 @@ public:
                         const Vec3d& tvec) = 0;
 };
 
-// Classe concreta do Crânio
-// Herda de ObjetoAnatomia, vinculada ao marcador ID 2
+// marcador ID 2
 class CranioAR : public ObjetoAnatomia {
 
 public:
