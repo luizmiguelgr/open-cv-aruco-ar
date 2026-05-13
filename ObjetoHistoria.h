@@ -166,8 +166,8 @@ public:
                 if (face.mNumIndices != 3) continue;
 
                 line(frame, pontos2D[face.mIndices[0]], pontos2D[face.mIndices[1]], Scalar(0, 255, 255), 1);
-                line(frame, pontos2D[face.mIndices[1]], pontos2D[face.mIndices[2]], Scalar(0, 255, 255), 1);
-                line(frame, pontos2D[face.mIndices[2]], pontos2D[face.mIndices[0]], Scalar(0, 255, 255), 1);
+                line(frame, pontos2D[face.mIndices[1]], pontos2D[face.mIndices[2]], Scalar(0, 255, 0), 1);
+                line(frame, pontos2D[face.mIndices[2]], pontos2D[face.mIndices[0]], Scalar(0, 165, 255), 1);
             }
         }
     }
