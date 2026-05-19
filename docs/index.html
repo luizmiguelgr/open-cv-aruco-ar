@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ArUco AR — Realidade Aumentada com OpenCV</title>
+<meta name="description" content="Projeto da disciplina CIN0135 (Estruturas de Dados Orientadas a Objetos) — CIn/UFPE. Detecta marcadores ArUco pela webcam e sobrepõe modelos 3D em wireframe em tempo real." />
+
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #161922;
+    --panel-2: #1d2230;
+    --text: #e7ecf3;
+    --muted: #9aa3b2;
+    --accent: #ffd166;
+    --accent-2: #06d6a0;
+    --link: #8ab4ff;
+    --border: #262b38;
+    --code-bg: #0b0d12;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
+  }
+
+  a { color: var(--link); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  header.hero {
+    padding: 80px 20px 60px;
+    text-align: center;
+    background: radial-gradient(1200px 500px at 50% -100px, rgba(255, 209, 102, 0.10), transparent 60%),
+                radial-gradient(800px 400px at 80% 0%, rgba(6, 214, 160, 0.08), transparent 60%),
+                var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  header.hero h1 {
+    margin: 0;
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  header.hero .subtitle {
+    margin: 18px auto 6px;
+    max-width: 720px;
+    color: var(--muted);
+    font-size: 1.15rem;
+  }
+  header.hero .course {
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+  header.hero .authors {
+    margin-top: 22px;
+    color: var(--text);
+    font-size: 1rem;
+  }
+  header.hero .authors strong { color: var(--accent); }
+
+  .cta {
+    margin-top: 32px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .cta a {
+    display: inline-block;
+    padding: 12px 22px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel);
+    color: var(--text);
+    font-weight: 600;
+    transition: transform 0.1s ease, border-color 0.1s ease, background 0.1s ease;
+  }
+  .cta a:hover {
+    text-decoration: none;
+    border-color: var(--accent);
+    background: var(--panel-2);
+    transform: translateY(-1px);
+  }
+  .cta a.primary {
+    background: var(--accent);
+    color: #1a1300;
+    border-color: var(--accent);
+  }
+  .cta a.primary:hover { background: #ffdc8b; }
+
+  main {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 60px 20px;
+  }
+
+  section { margin-bottom: 64px; }
+
+  h2 {
+    font-size: 1.7rem;
+    margin: 0 0 18px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    letter-spacing: -0.01em;
+  }
+
+  h3 { font-size: 1.2rem; margin: 28px 0 10px; color: var(--accent); }
+
+  p { color: var(--text); }
+
+  ul { padding-left: 20px; }
+  li { margin-bottom: 8px; }
+
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin-top: 18px;
+  }
+  .feature {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .feature h4 {
+    margin: 0 0 8px;
+    font-size: 1rem;
+    color: var(--accent-2);
+  }
+  .feature p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 18px;
+  }
+  @media (max-width: 700px) {
+    .gallery { grid-template-columns: 1fr; }
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .card .imgwrap {
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .card .meta {
+    padding: 12px 14px;
+  }
+  .card .meta h4 {
+    margin: 0 0 4px;
+    font-size: 1rem;
+  }
+  .card .meta p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .markers {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 18px;
+  }
+  @media (max-width: 700px) {
+    .markers { grid-template-columns: 1fr; }
+  }
+  .marker {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+  .marker img {
+    width: 100%;
+    max-width: 180px;
+    background: #fff;
+    padding: 8px;
+    border-radius: 4px;
+  }
+  .marker p {
+    margin: 10px 0 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .marker strong { color: var(--text); }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: #d8e0ec;
+  }
+  code {
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.93em;
+  }
+  p code, li code {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 30px 20px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  footer strong { color: var(--text); }
+
+  .badges {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+  .badge {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>ArUco AR</h1>
+  <p class="subtitle">Realidade Aumentada em C++ que detecta marcadores ArUco pela webcam e sobrepõe modelos 3D em wireframe sobre eles em tempo real.</p>
+  <p class="course">CIN0135 — Estruturas de Dados Orientadas a Objetos &middot; CIn/UFPE</p>
+  <p class="authors"><strong>Equipe:</strong> Luiz Taiguara &middot; Luiz Miguel &middot; Kaique Bonfim</p>
+
+  <div class="badges">
+    <span class="badge">C++17</span>
+    <span class="badge">OpenCV 4</span>
+    <span class="badge">Assimp</span>
+    <span class="badge">ArUco</span>
+    <span class="badge">CMake</span>
+  </div>
+
+  <div class="cta">
+    <a class="primary" href="https://github.com/luizmiguelgr/open-cv-aruco-ar" target="_blank" rel="noopener">Código no GitHub</a>
+    <a href="https://github.com/luizmiguelgr/open-cv-aruco-ar/blob/documentation/RELATORIO.md" target="_blank" rel="noopener">Relatório</a>
+    <a href="https://youtu.be/06RTr-myknA" target="_blank" rel="noopener">Vídeo no YouTube</a>
+  </div>
+</header>
+
+<main>
+
+  <section id="o-que-faz">
+    <h2>O que o sistema faz</h2>
+    <p>O ArUco AR é uma aplicação de Realidade Aumentada que, a cada frame da webcam:</p>
+    <div class="features">
+      <div class="feature">
+        <h4>1. Detecta marcadores</h4>
+        <p>Encontra marcadores ArUco impressos no campo de visão da câmera usando o detector da OpenCV.</p>
+      </div>
+      <div class="feature">
+        <h4>2. Estima a pose 3D</h4>
+        <p>Calcula posição e rotação do marcador no espaço com <code>solvePnP</code>, a partir dos cantos detectados.</p>
+      </div>
+      <div class="feature">
+        <h4>3. Seleciona o objeto</h4>
+        <p>Mapeia o ID do marcador para o modelo 3D correspondente via uma hierarquia polimórfica de classes.</p>
+      </div>
+      <div class="feature">
+        <h4>4. Renderiza em wireframe</h4>
+        <p>Projeta os vértices do modelo no plano da câmera com <code>projectPoints</code> e desenha as arestas dos triângulos.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="modelos">
+    <h2>Catálogo de modelos</h2>
+    <p>Cada marcador ArUco está vinculado a um modelo 3D distinto carregado via Assimp:</p>
+    <div class="gallery">
+      <div class="card">
+        <div class="imgwrap"><img src="img/torreeiffel.jpg" alt="Torre Eiffel" /></div>
+        <div class="meta">
+          <h4>Torre Eiffel</h4>
+          <p>Marcador ID 0 &middot; categoria <em>História</em></p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="imgwrap"><img src="img/statue.jpg" alt="Estátua" /></div>
+        <div class="meta">
+          <h4>Estátua</h4>
+          <p>Marcador ID 1 &middot; categoria <em>História</em></p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="imgwrap"><img src="img/cranio.jpg" alt="Crânio" /></div>
+        <div class="meta">
+          <h4>Crânio</h4>
+          <p>Marcador ID 2 &middot; categoria <em>Anatomia</em></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="marcadores">
+    <h2>Marcadores ArUco</h2>
+    <p>Os marcadores são gerados pelo utilitário <code>generate_markers</code> a partir do dicionário <code>DICT_4X4_50</code> da OpenCV. Para testar, basta imprimir ou exibir os PNGs e apontar a câmera:</p>
+    <div class="markers">
+      <div class="marker">
+        <img src="img/marker_0.png" alt="Marker 0" />
+        <p><strong>ID 0</strong><br/>→ Torre Eiffel</p>
+      </div>
+      <div class="marker">
+        <img src="img/marker_1.png" alt="Marker 1" />
+        <p><strong>ID 1</strong><br/>→ Estátua</p>
+      </div>
+      <div class="marker">
+        <img src="img/marker_2.png" alt="Marker 2" />
+        <p><strong>ID 2</strong><br/>→ Crânio</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="arquitetura">
+    <h2>Arquitetura — POO em ação</h2>
+    <p>A aplicação é organizada em torno de uma hierarquia de classes que isola o que é comum (carregar um modelo) do que é específico (como cada modelo é desenhado):</p>
+
+<pre><code>ObjetoAR   (classe base abstrata — define render() virtual puro)
+│
+├── ObjetoHistoria   (abstrata — carrega modelo via Assimp)
+│   ├── TorreEiffelAR   (ID 0)
+│   └── EstatuaAR       (ID 1)
+│
+└── ObjetoAnatomia   (abstrata — análoga, domínio anatômico)
+    └── CranioAR        (ID 2)
+
+GerenciadorAR    (mapeia ID do marcador → ObjetoAR*)
+</code></pre>
+
+    <p>O <code>main</code> não conhece nenhuma das classes concretas — trabalha apenas com ponteiros para <code>ObjetoAR</code> e o polimorfismo dinâmico do C++ escolhe o <code>render()</code> certo:</p>
+
+<pre><code>ObjetoAR* objeto = gerenciador.getObjeto(ids[i]);
+if (objeto != nullptr) {
+    objeto-&gt;render(frame, cameraMatrix, distCoeffs, rvec, tvec);
+}
+</code></pre>
+
+    <p>Adicionar um novo modelo (digamos, um coração humano) significa apenas criar uma subclasse concreta e registrá-la no <code>GerenciadorAR</code> — sem tocar no <code>main</code>. Mais detalhes no <a href="https://github.com/luizmiguelgr/open-cv-aruco-ar/blob/documentation/RELATORIO.md" target="_blank" rel="noopener">relatório</a>.</p>
+  </section>
+
+  <section id="como-rodar">
+    <h2>Como rodar</h2>
+    <p>Com OpenCV 4 (com contrib) e Assimp instalados via vcpkg, basta compilar com CMake:</p>
+
+<pre><code>mkdir build &amp;&amp; cd build
+cmake .. -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
+cmake --build . --config Release
+
+.\Release\generate_markers.exe   # gera os PNGs em markers/
+.\Release\aruco_ar.exe           # abre a webcam e roda
+</code></pre>
+
+    <p>Instruções completas no <a href="https://github.com/luizmiguelgr/open-cv-aruco-ar/blob/main/SETUP.md" target="_blank" rel="noopener">SETUP.md</a>.</p>
+  </section>
+
+  <section id="links">
+    <h2>Links</h2>
+    <ul>
+      <li><strong>Código:</strong> <a href="https://github.com/luizmiguelgr/open-cv-aruco-ar" target="_blank" rel="noopener">github.com/luizmiguelgr/open-cv-aruco-ar</a></li>
+      <li><strong>Relatório (Markdown):</strong> <a href="https://github.com/luizmiguelgr/open-cv-aruco-ar/blob/documentation/RELATORIO.md" target="_blank" rel="noopener">RELATORIO.md</a></li>
+      <li><strong>Vídeo no YouTube:</strong> <a href="https://youtu.be/06RTr-myknA" target="_blank" rel="noopener">https://youtu.be/06RTr-myknA</a></li>
+    </ul>
+  </section>
+
+</main>
+
+<footer>
+  <p><strong>ArUco AR</strong> &middot; CIN0135 — Estruturas de Dados Orientadas a Objetos &middot; CIn/UFPE</p>
+  <p>Luiz Taiguara &middot; Luiz Miguel &middot; Kaique Bonfim</p>
+</footer>
+
+</body>
+</html>
